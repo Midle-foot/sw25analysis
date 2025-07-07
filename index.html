@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>sw2.5出目解析ツール</title>
+  <link rel="stylesheet" href="a.css">
+</head>
+<body>
+  <h1>🎲 sw2.5ログ出目解析</h1>
+
+  <label for="logInput">① セッションログを以下に貼り付けてください</label>
+  <textarea id="logInput" placeholder="ここにログを貼り付けてください"></textarea>
+
+  <label for="excludeInput">② 除外したいキャラ名（カンマ区切りで入力。例：GM, エネミーA, エネミーB）</label>
+  <input id="excludeInput" type="text" placeholder="ここにキャラ名を入力してください">
+
+  <label for="sortSelect">③ 表の並び順</label>
+  <select id="sortSelect">
+    <option value="count">回数が多い順</option>
+    <option value="average">出目平均が高い順</option>
+    <option value="name">名前順（五十音順）</option>
+  </select>
+
+  <button id="analyzeButton" onclick="analyzeLog()">解析する</button>
+
+  <div class="result" id="result"></div>
+
+  <script src="a.js"></script>
+</body>
+</html>
