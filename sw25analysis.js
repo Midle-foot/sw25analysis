@@ -23,27 +23,39 @@ function analyzeLog() {
   const histogram = {};
 
   const regexName = /\[.*?\]\s+([^\]:]+?)\s*:/;
+  const regexDiceBlock = /2D:\[([0-9,\s]+)\]/;
   const regexAllDice = /(\d+),(\d+)/g;
+  const regexBracketDice = /\[([1-6]),([1-6])\]/g;
 
   for (const line of lines) {
-    if (!line.includes("2D:[") && !line.includes("＞")) continue;
-
     const nameMatch = regexName.exec(line);
     if (!nameMatch) continue;
     let name = normalizeName(nameMatch[1]);
     if (excludeNames.some(ex => name.includes(ex))) continue;
 
-    const diceBlockMatch = line.match(/2D:\[([^\]]+)\]/);
-    if (!diceBlockMatch) continue;
+    const diceBlockMatch = line.match(regexDiceBlock);
+    if (diceBlockMatch) {
+      const diceBlock = diceBlockMatch[1];
+      const allDiceMatches = [...diceBlock.matchAll(regexAllDice)];
+      for (const dice of allDiceMatches) {
+        const d1 = parseInt(dice[1]);
+        const d2 = parseInt(dice[2]);
+        if (d1 < 1 || d1 > 6 || d2 < 1 || d2 > 6) continue;
+        const total = d1 + d2;
+        if (!diceData[name]) {
+          diceData[name] = [];
+          histogram[name] = {};
+        }
+        diceData[name].push(total);
+        histogram[name][total] = (histogram[name][total] || 0) + 1;
+      }
+    }
 
-    const diceBlock = diceBlockMatch[1];
-    const allDiceMatches = [...diceBlock.matchAll(regexAllDice)];
-
-    for (const dice of allDiceMatches) {
+    const bracketDiceMatches = [...line.matchAll(regexBracketDice)];
+    for (const dice of bracketDiceMatches) {
       const d1 = parseInt(dice[1]);
       const d2 = parseInt(dice[2]);
       if (d1 < 1 || d1 > 6 || d2 < 1 || d2 > 6) continue;
-
       const total = d1 + d2;
       if (!diceData[name]) {
         diceData[name] = [];
