@@ -27,13 +27,15 @@ function analyzeLog() {
   const regexAllDice = /(\d+),(\d+)/g;
   const regexBracketDice = /\[([1-6]),([1-6])\]/g;
 
-  for (const line of lines) {
+  for (let line of lines) {
     const nameMatch = regexName.exec(line);
     if (!nameMatch) continue;
     let name = normalizeName(nameMatch[1]);
     if (excludeNames.some(ex => name.includes(ex))) continue;
 
-    const diceBlockMatch = line.match(regexDiceBlock);
+    let processedIndices = [];
+
+    const diceBlockMatch = regexDiceBlock.exec(line);
     if (diceBlockMatch) {
       const diceBlock = diceBlockMatch[1];
       const allDiceMatches = [...diceBlock.matchAll(regexAllDice)];
@@ -48,13 +50,17 @@ function analyzeLog() {
         }
         diceData[name].push(total);
         histogram[name][total] = (histogram[name][total] || 0) + 1;
+        processedIndices.push(`${d1},${d2}`);
       }
+      line = line.replace(/2D:\[[^\]]+\]/, "");
     }
 
     const bracketDiceMatches = [...line.matchAll(regexBracketDice)];
     for (const dice of bracketDiceMatches) {
       const d1 = parseInt(dice[1]);
       const d2 = parseInt(dice[2]);
+      const key = `${d1},${d2}`;
+      if (processedIndices.includes(key)) continue;
       if (d1 < 1 || d1 > 6 || d2 < 1 || d2 > 6) continue;
       const total = d1 + d2;
       if (!diceData[name]) {
